@@ -1,3 +1,14 @@
+//Create a UI that allows you to add household members
+  //form
+    //should validate age and require it
+  //Display members as they are added
+    //should be able to edit and delete them
+  //on submission it should serialize as json and send to fake server
+
+
+
+
+
 Household builder
 =================
 
