@@ -1,222 +1,286 @@
 // your code goes here ...
 
-onPageLoad();
-
-
-
-
-
-
-
 //functions
 
 //initializes app
 
-function onPageLoad(){
+(function onPageLoad() {
 
-  var household = [];
+  var household, age, relationship, smoker;
+
+  household = [];
 
   // addRequiredProperty();
   addIdsFormInputs();
-  addButtonEvent(household);
-
-}
-
-//validations
-
-// function addRequiredProperty(){
-//
-//   var inputArray = document.querySelectorAll("input");
-//   var age = inputArray[0];
-//   var relationship = document.querySelector("select")
-//
-//    age.required = true;
-//    relationship.required = true;
-// }
+  addButtonEvent();
 
 
 
 //adding Id's for easier access
 
-function addIdsFormInputs(){
-  var inputArray = document.querySelectorAll("input");
-  var select = document.querySelector("select");
+function addIdsFormInputs() {
+
+  var inputArray, select;
+
+  inputArray = document.querySelectorAll("input");
+  select = document.querySelector("select");
 
   inputArray[0].id = "age";
   inputArray[1].id = "smoker";
   select.id = "relationship";
 
-}
+};
 
 
 //Adding household members and clearing form
 
-function addButtonEvent(household){
+function addButtonEvent() {
 
-  var addButton = document.querySelector(".add");
+  var addButton;
+
+  addButton = document.querySelector(".add");
 
   addButton.addEventListener("click", function(e){
 
     e.preventDefault();
-    validate(household, createHouseholdMember);
+    validate(createHouseholdMember);
 
   });
-}
+};
 
-function validate(household, createEditMemberCallback, index){
-  if(createEditMemberCallback === createHouseholdMember){
+function validate(createEditMemberCallback, index) {
 
-    var age = document.querySelector("#age").value;
-    var relationship = document.querySelector("#relationship").value;
 
-  }
-  else if (createEditMemberCallback === editMember){
-    var age = document.querySelector("#ageEdit").value;
-    var relationship = document.querySelector("#relationshipEdit").value;
-  }
+  if ( createEditMemberCallback === createHouseholdMember ) {
 
-  if(age === "" || isNaN(age) === true ||parseInt(age, 10) <= 0){
-    alert("Valid Age Required")
-  }
-  else if(relationship === ""){
-    alert("Relationship Required")
-  }
-  else{
-      createEditMemberCallback(household, index)
-      clearForm();
-      displayHouseholdMembers(household);
+    age = document.querySelector("#age").value;
+    relationship = document.querySelector("#relationship").value
 
-  }
+  } else if ( createEditMemberCallback === editMember ) {
 
-}
+    age = document.querySelector("#ageEdit").value;
+    relationship = document.querySelector("#relationshipEdit").value;
 
-function createHouseholdMember(household){
+  };
 
-  var age = document.querySelector("#age").value;
-  var relationship = document.querySelector("#relationship").value;
-  var smoker = document.querySelector("#smoker").checked ? "Yes" : "No";
+  if ( age === "" || isNaN(age) === true || parseInt(age, 10) <= 0 ) {
 
-  var obj = {};
-      obj.age = age;
-      obj.relationship = relationship;
-      obj.smoker = smoker;
+    alert("Valid Age Required");
+
+  } else if ( relationship === "" ) {
+
+    alert("Relationship Required");
+
+  } else {
+
+    createEditMemberCallback(index);
+    clearForm();
+    displayHouseholdMembers();
+
+  };
+
+};
+
+function createHouseholdMember() {
+
+  var obj;
+
+  age = document.querySelector("#age").value;
+  relationship = document.querySelector("#relationship").value;
+  smoker = document.querySelector("#smoker").checked ? "Yes" : "No";
+
+  obj = {};
+  obj.age = age;
+  obj.relationship = relationship;
+  obj.smoker = smoker;
+
+
 
   household.push(obj);
 
-}
+};
 
-function clearForm(){
+function clearForm() {
+
   document.querySelector("#age").value = "";
   document.querySelector("#relationship").value = "";
   document.querySelector("#smoker").checked = false;
-}
+
+};
 
 
-//displaying household members added in DOM
+function displayHouseholdMembers() {
 
-function displayHouseholdMembers(household){
+  var display, htmlFragment, memberInfo, li, div, deleteButton, editButton;
 
-  var memberInfo = document.querySelector(".household");
-  memberInfo.innerHTMl = "";
-  var innerHTML = ""
+  display = document.querySelector(".household");
+  display.innerHTML = "";
+  htmlFragment = document.createDocumentFragment();
 
-  household.forEach(function(member, index){
+  household.forEach( function (member, index){
 
-     innerHTML += ("<li id ="+ index +"> Relationship: "+ member.relationship
-                    + " Age: " + member.age + " Smoker: " + member.smoker +
-                  "<button class='delete'>Delete</button>\
-                  <button class='edit'>Edit</button></li>");
+    memberInfo =  "Relationship: "+ member.relationship + "  |  "   +
+                        " Age: " + member.age + "  |  " +
+                        " Smoker: " + member.smoker + "    "
+    li = document.createElement("li");
+    li.id = index;
+
+    div = document.createElement("div");
+
+
+    //use css to capitalize the first word
+
+    deleteButton = document.createElement("button");
+    deleteButton.className = "delete";
+    deleteButton.innerHTML = "Delete"
+
+    editButton = document.createElement("button");
+    editButton.className = "edit";
+    editButton.innerHTML = "Edit"
+
+    div.append(memberInfo);
+    div.append(deleteButton);
+    div.append(editButton);
+    li.append(div);
+
+    htmlFragment.append(li);
 
   });
 
-  memberInfo.innerHTML = innerHTML;
-  addEditDeleteEvents(household);
+  display.append(htmlFragment);
+  addEditDeleteEvents();
 
-}
-
+};
 
 //delete and edit houshold memberInfo
 
-function addEditDeleteEvents(household){
+function addEditDeleteEvents() {
 
-  var householdMemberDelete = document.querySelectorAll(".delete");
-  var householdMemberEdit = document.querySelectorAll(".edit");
+  var householdMemberDelete, householdMemberEdit;
 
-  householdMemberDelete.forEach(function(button, index){
+  householdMemberDelete = document.querySelectorAll(".delete");
+  householdMemberEdit = document.querySelectorAll(".edit");
 
-    button.addEventListener("click", function(e){
 
-      e.preventDefault();
-      household.splice(index,1);
-      displayHouseholdMembers(household);
-
-    })
-
-  })
-
-  householdMemberEdit.forEach(function(button, index){
+  householdMemberDelete.forEach( function (button, index){
 
     button.addEventListener("click", function(e){
+      deleteMember(e, index);
+    });
 
-      e.preventDefault();
+  });
 
-      var member = household[index]
-      var li = document.querySelectorAll("li")[index]
-      li.innerHTML = editForm( member.age, member.smoker);
-      var relationshipOptions = li.querySelectorAll("option");
-      relationshipOptions.forEach(function(option){
-        if(option.value === member.relationship){
-          option.selected = true;
-        }
-      })
+  householdMemberEdit.forEach(function(button, index) {
 
-      li.querySelector("form").addEventListener("submit",function(e){
-        e.preventDefault();
-        validate(household, editMember, index)
-      })
-    })
+    button.addEventListener("click", function(e){
+      renderEditForm(e, index);
+    });
 
-  })
+  });
+
+};
+
+function deleteMember(e, index) {
+
+  e.preventDefault();
+  household.splice(index, 1);
+  displayHouseholdMembers();
+
+};
+
+function renderEditForm(e, index) {
+
+  e.preventDefault();
+
+  var member, listOfHouseholdMembersDisplayed, relationshipOptions, div, form;
+
+  member = household[index];
+  listOfHouseholdMembersDisplayed = document.querySelectorAll("li")
+  div = listOfHouseholdMembersDisplayed[index].querySelector("div")
+  form = createEditForm( member.age, member.smoker, member.relationship);
+  listOfHouseholdMembersDisplayed[index].replaceChild(form, div);
+
+debugger
+  listOfHouseholdMembersDisplayed[index].querySelector("form").addEventListener("submit", function (e) {
+    debugger
+    e.preventDefault();
+    validate(editMember, index)
+  });
 
 }
 
-function editMember(household, index){
+function createEditForm(memberAge, memberSmoker, memberRelationship) {
 
-  var member = household[index];
+  var documentFragment, form, relationshipOptions, button, labelRelationship,
+      labelAge, labelSmoker, labelButton;
 
-  member.age = document.querySelector("#ageEdit").value
-  member.relationship = document.querySelector("#relationshipEdit").value
-  member.smoker = document.querySelector("#smokerEdit").checked ? "Yes":"No"
-}
+  documentFragment = document.createDocumentFragment()
+  memberSmoker = memberSmoker === "Yes"? true: false;
+  form = document.createElement("form");
 
-function editForm(age, smoker){
+  relationship = document.querySelector("#relationship").cloneNode(true);
+  relationship.id = "relationshipEdit";
 
-  var smoker = "Yes"? true: false;
+  relationshipOptions = relationship.querySelectorAll("option");
+  relationshipOptions.forEach(function(option){
 
-  var form = "<form>\
-                <label>Relationship\
-                  <select id='relationshipEdit' name='rel'>\
-                    <option value=''>---</option>\
-                    <option value='self'>Self</option>\
-                    <option value='spouse'>Spouse</option>\
-                    <option value='child'>Child</option>\
-                    <option value='parent'>Parent</option>\
-                    <option value='grandparent'>Grandparent</option>\
-                    <option value='other'>Other</option>\
-                  </select>\
-                </label>\
-                <label>Age\
-                  <input id='ageEdit' type='text' name='age' value =" + age +">\
-                </label>\
-                <label>Smoker?\
-                  <input id='smokerEdit' type='checkbox' name='smoker' checked=" + smoker +">\
-                </label>\
-                  <button type='submit'>submit</button>\
-              </form>"
+    if ( option.value === memberRelationship ) {
+      option.selected = true;
+    }
 
-  return form
-}
+  });
+
+  age = document.querySelector("#age").cloneNode(true);
+  age.id = "ageEdit";
+  age.value = memberAge
+
+  smoker = document.querySelector("#smoker").cloneNode(true);
+  smoker.id = "idEdit";
+  smoker.checked = memberSmoker;
+
+  button = document.createElement("button");
+  button.type = "Submit";
+  button.innerHTML = "Submit";
+
+  labelRelationship = document.createElement("label");
+  labelRelationship.append("Relationship");
+  labelRelationship.append(relationship);
+
+  labelAge = document.createElement("label");
+  labelAge.append("Age");
+  labelAge.append(age);
+
+  labelSmoker = document.createElement("label");
+  labelSmoker.append("Smoker");
+  labelSmoker.append(smoker);
+
+  documentFragment.append(labelRelationship);
+  documentFragment.append(labelAge);
+  documentFragment.append(labelSmoker);
+  documentFragment.append(button);
+
+  return documentFragment
+
+};
+
+function editMember(index) {
+
+  var member;
+
+  member = household[index];
+  member.age = document.querySelector("#ageEdit").value;
+  member.relationship = document.querySelector("#relationshipEdit").value;
+  member.smoker = document.querySelector("#smokerEdit").checked ? "Yes":"No";
+
+};
+
+})();
+
+
 
 // submit
 
 // functiion submit()
+
+
+//change querySelector to findId or find by class
