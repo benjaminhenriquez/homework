@@ -1,7 +1,3 @@
-// your code goes here ...
-
-//functions
-
 //initializes app
 
 (function onPageLoad() {
@@ -10,27 +6,25 @@
 
   household = [];
 
-  // addRequiredProperty();
   addIdsFormInputs();
   addButtonEvent();
+  submitFormEvent();
 
 
+//functions
 
-//adding Id's for easier access
-
-function addIdsFormInputs() {
+function addIdsFormInputs() {  //adding Id's for easier access
 
   var inputArray, select;
 
-  inputArray = document.querySelectorAll("input");
-  select = document.querySelector("select");
+  inputArray = document.getElementsByTagName("input");
+  select = document.getElementsByTagName("select");
 
   inputArray[0].id = "age";
   inputArray[1].id = "smoker";
-  select.id = "relationship";
+  select[0].id = "relationship";
 
 };
-
 
 //Adding household members and clearing form
 
@@ -50,16 +44,15 @@ function addButtonEvent() {
 
 function validate(createEditMemberCallback, index) {
 
-
   if ( createEditMemberCallback === createHouseholdMember ) {
 
-    age = document.querySelector("#age").value;
-    relationship = document.querySelector("#relationship").value
+    age = document.getElementById("age").value;
+    relationship = document.getElementById("relationship").value
 
   } else if ( createEditMemberCallback === editMember ) {
 
-    age = document.querySelector("#ageEdit").value;
-    relationship = document.querySelector("#relationshipEdit").value;
+    age = document.getElementById("ageEdit").value;
+    relationship = document.getElementById("relationshipEdit").value;
 
   };
 
@@ -85,9 +78,9 @@ function createHouseholdMember() {
 
   var obj;
 
-  age = document.querySelector("#age").value;
-  relationship = document.querySelector("#relationship").value;
-  smoker = document.querySelector("#smoker").checked ? "Yes" : "No";
+  age = document.getElementById("age").value;
+  relationship = document.getElementById("relationship").value;
+  smoker = document.getElementById("smoker").checked ? "Yes" : "No";
 
   obj = {};
   obj.age = age;
@@ -102,9 +95,9 @@ function createHouseholdMember() {
 
 function clearForm() {
 
-  document.querySelector("#age").value = "";
-  document.querySelector("#relationship").value = "";
-  document.querySelector("#smoker").checked = false;
+  document.getElementById("age").value = "";
+  document.getElementById("relationship").value = "";
+  document.getElementById("smoker").checked = false;
 
 };
 
@@ -119,16 +112,14 @@ function displayHouseholdMembers() {
 
   household.forEach( function (member, index){
 
-    memberInfo =  "Relationship: "+ member.relationship + "  |  "   +
-                        " Age: " + member.age + "  |  " +
-                        " Smoker: " + member.smoker + "    "
+    memberInfo =  "Relationship: "+ member.relationship + "    |    "   +
+                        " Age: " + member.age + "    |    " +
+                        " Smoker: " + member.smoker + "      "
     li = document.createElement("li");
     li.id = index;
 
     div = document.createElement("div");
-
-
-    //use css to capitalize the first word
+    div.style.textTransform = "capitalize";
 
     deleteButton = document.createElement("button");
     deleteButton.className = "delete";
@@ -138,11 +129,8 @@ function displayHouseholdMembers() {
     editButton.className = "edit";
     editButton.innerHTML = "Edit"
 
-    div.append(memberInfo);
-    div.append(deleteButton);
-    div.append(editButton);
+    div.append(memberInfo, deleteButton, editButton);
     li.append(div);
-
     htmlFragment.append(li);
 
   });
@@ -200,10 +188,9 @@ function renderEditForm(e, index) {
   form = createEditForm( member.age, member.smoker, member.relationship);
   listOfHouseholdMembersDisplayed[index].replaceChild(form, div);
 
-debugger
-  listOfHouseholdMembersDisplayed[index].querySelector("form").addEventListener("submit", function (e) {
-    debugger
-    e.preventDefault();
+  document.getElementById("editForm").addEventListener("submit", function (event) {
+
+    event.preventDefault();
     validate(editMember, index)
   });
 
@@ -217,8 +204,9 @@ function createEditForm(memberAge, memberSmoker, memberRelationship) {
   documentFragment = document.createDocumentFragment()
   memberSmoker = memberSmoker === "Yes"? true: false;
   form = document.createElement("form");
+  form.id = "editForm"
 
-  relationship = document.querySelector("#relationship").cloneNode(true);
+  relationship = document.getElementById("relationship").cloneNode(true);
   relationship.id = "relationshipEdit";
 
   relationshipOptions = relationship.querySelectorAll("option");
@@ -230,12 +218,12 @@ function createEditForm(memberAge, memberSmoker, memberRelationship) {
 
   });
 
-  age = document.querySelector("#age").cloneNode(true);
+  age = document.getElementById("age").cloneNode(true);
   age.id = "ageEdit";
   age.value = memberAge
 
-  smoker = document.querySelector("#smoker").cloneNode(true);
-  smoker.id = "idEdit";
+  smoker = document.getElementById("smoker").cloneNode(true);
+  smoker.id = "smokerEdit";
   smoker.checked = memberSmoker;
 
   button = document.createElement("button");
@@ -243,21 +231,16 @@ function createEditForm(memberAge, memberSmoker, memberRelationship) {
   button.innerHTML = "Submit";
 
   labelRelationship = document.createElement("label");
-  labelRelationship.append("Relationship");
-  labelRelationship.append(relationship);
+  labelRelationship.append("Relationship", relationship);
 
   labelAge = document.createElement("label");
-  labelAge.append("Age");
-  labelAge.append(age);
+  labelAge.append("Age", age);
 
   labelSmoker = document.createElement("label");
-  labelSmoker.append("Smoker");
-  labelSmoker.append(smoker);
+  labelSmoker.append("Smoker", smoker);
 
-  documentFragment.append(labelRelationship);
-  documentFragment.append(labelAge);
-  documentFragment.append(labelSmoker);
-  documentFragment.append(button);
+  form.append(labelRelationship, labelAge, labelSmoker, button);
+  documentFragment.append(form);
 
   return documentFragment
 
@@ -268,19 +251,24 @@ function editMember(index) {
   var member;
 
   member = household[index];
-  member.age = document.querySelector("#ageEdit").value;
-  member.relationship = document.querySelector("#relationshipEdit").value;
-  member.smoker = document.querySelector("#smokerEdit").checked ? "Yes":"No";
+  member.age = document.getElementById("ageEdit").value;
+  member.relationship = document.getElementById("relationshipEdit").value;
+  member.smoker = document.getElementById("smokerEdit").checked ? "Yes" : "No";
 
 };
 
+function submitFormEvent(){
+
+  var form;
+
+  form = document.querySelector("form");
+  form.addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+  })
+
+}
+
+
 })();
-
-
-
-// submit
-
-// functiion submit()
-
-
-//change querySelector to findId or find by class
