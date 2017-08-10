@@ -265,9 +265,20 @@ function submitFormEvent(){
   form.addEventListener("submit", function(e){
 
     e.preventDefault();
+    serialize(household)
 
   })
 
+}
+
+function serialize(household){
+  var json, debug;
+
+  json = JSON.stringify(household);
+  debug = document.querySelector(".debug");
+
+  debug.innerHTML = json;
+  debug.style.display = 'block';
 }
 
 
