@@ -2,284 +2,192 @@
 
 (function onPageLoad() {
 
-  var household, age, relationship, smoker;
+  var household = [];
 
-  household = [];
-
-  addIdsFormInputs();
-  addButtonEvent();
-  submitFormEvent();
-
-
-//functions
-
-function addIdsFormInputs() {  //adding Id's for easier access
-
-  var inputArray, select;
-
-  inputArray = document.getElementsByTagName("input");
-  select = document.getElementsByTagName("select");
-
-  inputArray[0].id = "age";
-  inputArray[1].id = "smoker";
-  select[0].id = "relationship";
-
-};
-
-//Adding household members and clearing form
-
-function addButtonEvent() {
-
-  var addButton;
-
-  addButton = document.querySelector(".add");
-
-  addButton.addEventListener("click", function(e){
-
-    e.preventDefault();
-    validate(createHouseholdMember);
-
-  });
-};
-
-function validate(createEditMemberCallback, index) {
-
-  if ( createEditMemberCallback === createHouseholdMember ) {
-
-    age = document.getElementById("age").value;
-    relationship = document.getElementById("relationship").value
-
-  } else if ( createEditMemberCallback === editMember ) {
-
-    age = document.getElementById("ageEdit").value;
-    relationship = document.getElementById("relationshipEdit").value;
-
+  function Member(age, relationship, smoker){
+    this.age = age;
+    this.relationship = relationship;
+    this.smoker = smoker;
   };
 
-  if ( age === "" || isNaN(age) === true || parseInt(age, 10) <= 0 ) {
+  function createHouseholdMember() {
+    var age = document.getElementsByName("age")[0].value;
+    var relationship = document.getElementsByName("rel")[0].value;
+    var smoker = document.getElementsByName("smoker")[0].checked ? "Yes" : "No";
 
-    alert("Valid Age Required");
+    var obj = new Member(age, relationship, smoker);
 
-  } else if ( relationship === "" ) {
-
-    alert("Relationship Required");
-
-  } else {
-
-    createEditMemberCallback(index);
-    clearForm();
-    displayHouseholdMembers();
-
+    household.push(obj);
   };
 
-};
+  function validate(createEditMemberCallback, index) {
+    var age = "";
+    var relationship = "";
 
-function createHouseholdMember() {
-
-  var obj;
-
-  age = document.getElementById("age").value;
-  relationship = document.getElementById("relationship").value;
-  smoker = document.getElementById("smoker").checked ? "Yes" : "No";
-
-  obj = {};
-  obj.age = age;
-  obj.relationship = relationship;
-  obj.smoker = smoker;
-
-
-
-  household.push(obj);
-
-};
-
-function clearForm() {
-
-  document.getElementById("age").value = "";
-  document.getElementById("relationship").value = "";
-  document.getElementById("smoker").checked = false;
-
-};
-
-
-function displayHouseholdMembers() {
-
-  var display, htmlFragment, memberInfo, li, div, deleteButton, editButton;
-
-  display = document.querySelector(".household");
-  display.innerHTML = "";
-  htmlFragment = document.createDocumentFragment();
-
-  household.forEach( function (member, index){
-
-    memberInfo =  "Relationship: "+ member.relationship + "    |    "   +
-                        " Age: " + member.age + "    |    " +
-                        " Smoker: " + member.smoker + "      "
-    li = document.createElement("li");
-    li.id = index;
-
-    div = document.createElement("div");
-    div.style.textTransform = "capitalize";
-
-    deleteButton = document.createElement("button");
-    deleteButton.className = "delete";
-    deleteButton.innerHTML = "Delete"
-
-    editButton = document.createElement("button");
-    editButton.className = "edit";
-    editButton.innerHTML = "Edit"
-
-    div.append(memberInfo, deleteButton, editButton);
-    li.append(div);
-    htmlFragment.append(li);
-
-  });
-
-  display.append(htmlFragment);
-  addEditDeleteEvents();
-
-};
-
-//delete and edit houshold memberInfo
-
-function addEditDeleteEvents() {
-
-  var householdMemberDelete, householdMemberEdit;
-
-  householdMemberDelete = document.querySelectorAll(".delete");
-  householdMemberEdit = document.querySelectorAll(".edit");
-
-
-  householdMemberDelete.forEach( function (button, index){
-
-    button.addEventListener("click", function(e){
-      deleteMember(e, index);
-    });
-
-  });
-
-  householdMemberEdit.forEach(function(button, index) {
-
-    button.addEventListener("click", function(e){
-      renderEditForm(e, index);
-    });
-
-  });
-
-};
-
-function deleteMember(e, index) {
-
-  e.preventDefault();
-  household.splice(index, 1);
-  displayHouseholdMembers();
-
-};
-
-function renderEditForm(e, index) {
-
-  e.preventDefault();
-
-  var member, listOfHouseholdMembersDisplayed, relationshipOptions, div, form;
-
-  member = household[index];
-  listOfHouseholdMembersDisplayed = document.querySelectorAll("li")
-  div = listOfHouseholdMembersDisplayed[index].querySelector("div")
-  form = createEditForm( member.age, member.smoker, member.relationship);
-  listOfHouseholdMembersDisplayed[index].replaceChild(form, div);
-
-  document.getElementById("editForm").addEventListener("submit", function (event) {
-
-    event.preventDefault();
-    validate(editMember, index)
-  });
-
-}
-
-function createEditForm(memberAge, memberSmoker, memberRelationship) {
-
-  var documentFragment, form, relationshipOptions, button, labelRelationship,
-      labelAge, labelSmoker, labelButton;
-
-  documentFragment = document.createDocumentFragment()
-  memberSmoker = memberSmoker === "Yes"? true: false;
-  form = document.createElement("form");
-  form.id = "editForm"
-
-  relationship = document.getElementById("relationship").cloneNode(true);
-  relationship.id = "relationshipEdit";
-
-  relationshipOptions = relationship.querySelectorAll("option");
-  relationshipOptions.forEach(function(option){
-
-    if ( option.value === memberRelationship ) {
-      option.selected = true;
+    if ( createEditMemberCallback === createHouseholdMember ) {
+      age = document.getElementsByName("age")[0].value;
+      relationship = document.getElementsByName("rel")[0].value
+    } else if ( createEditMemberCallback === editMember ) {
+      age = document.getElementById("ageEdit").value;
+      relationship = document.getElementById("relationshipEdit").value;
     }
 
+    if ( age === "" || isNaN(age) === true || parseInt(age, 10) <= 0 ) {
+      alert("Valid Age Required");
+    } else if ( relationship === "" ) {
+      alert("Relationship Required");
+    } else {
+      createEditMemberCallback(index);
+      clearForm();
+      displayHouseholdMembers();
+    };
+  };
+
+
+  function clearForm() {
+    document.getElementsByName("age")[0].value = "";
+    document.getElementsByName("rel")[0].value = "";
+    document.getElementsByName("smoker")[0].checked = false;
+  };
+
+  function displayHouseholdMembers() {
+    var htmlFragment = document.createDocumentFragment();
+
+    household.forEach( function (member, index){
+
+      var memberInfo =  "Relationship: "+ member.relationship + "    |    "   +
+                          " Age: " + member.age + "    |    " +
+                          " Smoker: " + member.smoker + "      ";
+      var li = document.createElement("li");
+      li.id = index;
+
+      var div = document.createElement("div");
+      div.style.textTransform = "capitalize";
+
+      var deleteButton = document.createElement("button");
+      deleteButton.className = "delete";
+      deleteButton.innerHTML = "Delete";
+
+      var editButton = document.createElement("button");
+      editButton.className = "edit";
+      editButton.innerHTML = "Edit";
+
+      div.append(memberInfo, deleteButton, editButton);
+      li.append(div);
+      htmlFragment.append(li);
+    });
+
+    var display = document.querySelector(".household");
+    display.innerHTML = "";
+    display.append(htmlFragment);
+    addEditDeleteEvents();
+  };
+
+  //delete and edit houshold memberInfo
+  function addEditDeleteEvents() {
+    document.querySelectorAll(".delete").forEach( function (button, index){
+      button.addEventListener("click", function(e){
+        deleteMember(e, index);
+      });
+    });
+
+    document.querySelectorAll(".edit").forEach(function(button, index) {
+      button.addEventListener("click", function(e){
+        renderEditForm(e, index);
+      });
+    });
+  };
+
+  function deleteMember(e, index) {
+    e.preventDefault();
+    household.splice(index, 1);
+    displayHouseholdMembers();
+  };
+
+  function renderEditForm(e, index) {
+    e.preventDefault();
+
+    var member = household[index];
+    var listOfHouseholdMembersDisplayed = document.querySelectorAll("li")
+    var div = listOfHouseholdMembersDisplayed[index].querySelector("div")
+    var form = createEditForm( member.age, member.smoker, member.relationship);
+    listOfHouseholdMembersDisplayed[index].replaceChild(form, div);
+
+    document.getElementById("editForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      validate(editMember, index)
+    });
+  };
+
+  function createEditForm(memberAge, memberSmoker, memberRelationship) {
+    var documentFragment = document.createDocumentFragment()
+    var memberSmokerTF = memberSmoker === "Yes"? true: false;
+    var form = document.createElement("form");
+    form.id = "editForm"
+
+    var relationship = document.getElementsByName("rel")[0].cloneNode(true);
+    relationship.id = "relationshipEdit";
+
+    var relationshipOptions = relationship.querySelectorAll("option");
+    relationshipOptions.forEach(function(option){
+
+      if ( option.value === memberRelationship ) {
+        option.selected = true;
+      }
+    });
+
+    var age = document.getElementsByName("age")[0].cloneNode(true);
+    age.id = "ageEdit";
+    age.value = memberAge
+
+    var smoker = document.getElementsByName("smoker")[0].cloneNode(true);
+    smoker.id = "smokerEdit";
+    smoker.checked = memberSmokerTF;
+
+    var button = document.createElement("button");
+    button.type = "Submit";
+    button.innerHTML = "Submit";
+
+    var labelRelationship = document.createElement("label");
+    labelRelationship.append("Relationship", relationship);
+
+    var labelAge = document.createElement("label");
+    labelAge.append("Age", age);
+
+    var labelSmoker = document.createElement("label");
+    labelSmoker.append("Smoker", smoker);
+
+    form.append(labelRelationship, labelAge, labelSmoker, button);
+    documentFragment.append(form);
+
+    return documentFragment
+  };
+
+  function editMember(index) {
+    var member = household[index];
+    member.age = document.getElementById("ageEdit").value;
+    member.relationship = document.getElementById("relationshipEdit").value;
+    member.smoker = document.getElementById("smokerEdit").checked ? "Yes" : "No";
+  };
+
+  function serialize(household){
+    var json = JSON.stringify(household);
+    var debug = document.querySelector(".debug");
+
+    debug.innerHTML = json;
+    debug.style.display = 'block';
+  };
+
+
+
+  document.querySelector(".add").addEventListener("click", function(e){
+    e.preventDefault();
+    validate(createHouseholdMember);
   });
 
-  age = document.getElementById("age").cloneNode(true);
-  age.id = "ageEdit";
-  age.value = memberAge
-
-  smoker = document.getElementById("smoker").cloneNode(true);
-  smoker.id = "smokerEdit";
-  smoker.checked = memberSmoker;
-
-  button = document.createElement("button");
-  button.type = "Submit";
-  button.innerHTML = "Submit";
-
-  labelRelationship = document.createElement("label");
-  labelRelationship.append("Relationship", relationship);
-
-  labelAge = document.createElement("label");
-  labelAge.append("Age", age);
-
-  labelSmoker = document.createElement("label");
-  labelSmoker.append("Smoker", smoker);
-
-  form.append(labelRelationship, labelAge, labelSmoker, button);
-  documentFragment.append(form);
-
-  return documentFragment
-
-};
-
-function editMember(index) {
-
-  var member;
-
-  member = household[index];
-  member.age = document.getElementById("ageEdit").value;
-  member.relationship = document.getElementById("relationshipEdit").value;
-  member.smoker = document.getElementById("smokerEdit").checked ? "Yes" : "No";
-
-};
-
-function submitFormEvent(){
-
-  var form;
-
-  form = document.querySelector("form");
-  form.addEventListener("submit", function(e){
-
+  document.querySelector("form").addEventListener("submit", function(e){
     e.preventDefault();
-    serialize(household)
-
-  })
-
-}
-
-function serialize(household){
-  var json, debug;
-
-  json = JSON.stringify(household);
-  debug = document.querySelector(".debug");
-
-  debug.innerHTML = json;
-  debug.style.display = 'block';
-}
-
+    serialize(household);
+  });
 
 })();
