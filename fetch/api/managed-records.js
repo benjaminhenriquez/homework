@@ -4,103 +4,111 @@ import URI from "urijs";
 // /records endpoint
 window.path = "http://localhost:3000/records";
 
-
-
 // Your retrieve function plus any additional functions go here ...
+
 function retrieve(options){
-
-
-
-  var options = options ? options : {};
-  var page = options.page ? options.page : 1;
+  options = options ? options : {}; //If no options object is passed, an empty one is created.
+  var page = options.page ? options.page : 1; //If no page number is given, a page number of 1 is given.
   var startIndex = page * 10 - 10;
-  var colors = options.colors ? options.colors : ["red", "brown", "blue", "yellow", "green"];
-  var uri = new URI(window.path).search({limit: 10, offset: startIndex});
+  var colors = options.colors ? options.colors : ["red", "brown", "blue", "yellow", "green"]; //If no colors array is given, an array with all colors is given.
+  var uriColors = colors.slice(0); //Clone of colors array is created as to not mutate that variable.
+  var uri = new URI(window.path).search({limit: 10, offset: startIndex }); //URL is created using URI library which takes an object.
 
-  colors.forEach(function(color){
-    var string = "&color[]=" + color;
-    uri = uri + string
-  })
+  uri += getColors(uriColors); //Adds colors to end of URL recursively.
 
-
-
-
-  var data = fetch(uri).then(function(response){
-
+  var data = fetch(uri).then(function(response){ //Uses Fetch library to make get request to URL. Resolved promise is stored in data variable.
     if(response.ok) {
-      var j = response.json();
-
-      return j;
+      var json = response.json();
+      return json;
     }
-    throw new Error('Network response was not ok.');
+    throw new Error('Network response was not ok.'); //Error created.
+  }).then(function(json){
 
-  }).then(function(j){
-
-
-    if(page === 1 && j.length === 0){
-        var obj = {}
-          obj.ids = [  ], obj.open = [  ], obj.closedPrimaryCount = 0;
-          obj.previousPage = null;
-          obj.nextPage =  null;
-
-        return obj;
-
-    }
-
-    else{
-
-      var closed = 0;
-
-      var obj = {}
-      obj.previousPage = page - 1 < 1 ? null : page - 1;
-      obj.nextPage =  page + 1 > 50 ? null : page + 1;
-      obj.ids = [  ], obj.open = [  ], obj.closedPrimaryCount = 0;
-
-
-
-      j.forEach(function(x){
-
-        if(x.color === "red" || x.color === "yellow" || x.color === "blue"){
-          x.isPrimary = true
-        }
-      else{
-        x.isPrimary = false
-      }
-
-        if(x.disposition === 'closed'  && x.isPrimary === true){
-          closed++;
-        }
-        else if(x.disposition === 'open'){
-
-          obj.open.push(x);
-        }
-
-        obj.ids.push(x.id)
-        obj.closedPrimaryCount = closed;
-
-
-      });
-
-
-      return obj;
-
-    }
-
-
-
-
+      return buildObject(json, page, colors); //Manipulates json received and creates a Javascript object to be stored in data variable.
 
   }).catch(function(error) {
+     console.log('There has been a problem with your request: ' + error.message); //Logs error.
+  });
 
-     console.log('There has been a problem with your fetch operation: ' + error.message);
+  return data; //Returns an Object with transformed data.
+};
 
-});
+//Helper Functions. Initially used forEach methods to iterate but changed to recursury functions as to avoid any kind of for loop.
 
+function getColors(colors) { //Adds each color to end of URL
+  if(colors.length == 0) {
+    return "";
+  }
+  var next = colors.shift();
+  return "&color[]=" + next + getColors(colors);
+};
 
-return data;
+function buildObject(json, page, colors) {//Creates Object and sets initial values.
+  var obj = {};
+  obj.ids = [  ], obj.open = [  ], obj.closedPrimaryCount = 0;
 
+  if(checkColor(colors) === false){ //If false will return an object with null values
+    obj.previousPage = null;
+    obj.nextPage = null;
 
-}
+    return obj;
+  }
+  else{ //If ture will go on and build Object with JSON data.
+    obj.previousPage = page - 1 < 1 ? null : page - 1;
+    obj.nextPage =  page + 1 > 50 ? null : page + 1;
 
+    buildHelper(json, obj, 0); //Calls function that will recursively go through each object returned from json array and flush out object created in function.
+    return obj; //Returns object that will be stored in Data varialbe and returned at end of retrieve function.
+  }
+
+};
+
+function checkColor(colorsQueried){ // Compares colors Queried array with array of valid colors one at a time.
+  var availableColors = ["red", "brown", "blue", "yellow", "green"];
+
+  if(colorsQueried.length === 0){
+    return true;
+  }
+  else{
+    var next = colorsQueried.shift();
+    var validColors = availableColors.filter(function(c){
+        return next === c;
+    });
+
+    if(validColors.length === 0){ //If colorQueried is not found in list of valid colors, function returns false.
+      return false;
+    }
+    else{ //If color is found, it will move to next color in list of colorsQueried until there is no more in list.
+      return checkColor(colorsQueried);
+    }
+  }
+};
+
+function buildHelper(json, obj, closed) { //Moves through json and help build the object to be stored in Data.
+  if(json.length == 0) {
+    return; //No need to return since object is beind called by reference and mutated.
+  }
+
+  var x = json.shift();
+
+   //Will go through each(x) of the json objects and make count of closedPrimaryCount, add isPrimary key, and add(or not) to open array. 
+  if(x.color === "red" || x.color === "yellow" || x.color === "blue"){//Adds isPrimary key and values.
+    x.isPrimary = true;
+  }
+  else{
+    x.isPrimary = false;
+  }
+
+  if(x.disposition === 'closed'  && x.isPrimary === true){ //Adds to closedPrimaryCount.
+    closed++;
+  }
+  else if(x.disposition === 'open'){ //If open is true, will push entire object to Open array in object that is to be returned.
+    obj.open.push(x);
+  }
+
+  obj.ids.push(x.id); //Pushes the id of each object into array in object to be returned.
+  obj.closedPrimaryCount = closed;
+  buildHelper(json, obj, closed); //Calls itself again if there are still json objects to be manipulated and counted.
+};
 
 export default retrieve;
